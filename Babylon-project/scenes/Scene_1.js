@@ -24,6 +24,7 @@ export class Scene_1{
         
         this.setSounds();
         this.createObjects();
+        this.setDropZones();
         this.setDragObjects();
         this.unlockSounds();
     }
@@ -96,22 +97,28 @@ export class Scene_1{
         this.dragObjects.push(cylinder);
     }
 
+    setDropZones(){
+        this.dropZones = this.dropZones.map(dropZone => new DropZone(dropZone));
+    }
+
     setDragObjects(){
         this.dragObjects.forEach(dragObject => {
 
             const dragHandler = new DragHandler(dragObject);
 
-            dragHandler.setOnDragEndCallback((draggedObject) => {
-                this.dropZones.forEach(dropZone => {
-                    const dropObj = new DropZone(dropZone);
-                    const placementCheck = dropObj.checkPlacement(draggedObject);
-                    if (placementCheck.isValid) {
-                        dragHandler.disableDragging();
-                        this.dragObjectsInPosition(draggedObject.metadata.dropZoneId);
-                        console.log(draggedObject.metadata.dropZoneId);
-                    }
-                });
+            dragHandler.setOnDragEndCallback((draggedObject) => {this.handleDrop(draggedObject, dragHandler);
             });
+        });
+    }
+
+    handleDrop(draggedObject, dragHandler){
+        this.dropZones.forEach(dropZone => {
+            const placementCheck = dropZone.checkPlacement(draggedObject);
+            if (placementCheck.isValid) {
+                dragHandler.disableDragging();
+                this.dragObjectsInPosition(draggedObject.metadata.dropZoneId);
+                console.log(draggedObject.metadata.dropZoneId);
+            }
         });
     }
 
